@@ -10,7 +10,7 @@ dotenv.config()
 const app=express()
 const port=3000
 app.use(cors({
-    origin:"https://timewrapbd.netlify.app",
+    origin:"https://spaytimes.xyz",
     credentials:true
 }))
 app.use(express.json())

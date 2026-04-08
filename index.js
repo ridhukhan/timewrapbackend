@@ -17,12 +17,11 @@ const httpServer = createServer(app);
 
 export const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://spaytimes.xyz",
     credentials: true,
   },
 });
 
-// Online users track করবো
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
@@ -39,7 +38,7 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: "https://spaytimes.xyz", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 

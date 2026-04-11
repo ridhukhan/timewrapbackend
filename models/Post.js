@@ -12,6 +12,10 @@ const postSchema = new mongoose.Schema({
   mediaType: { type: String, enum: ["image", "video", ""], default: "" },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   comments: [commentSchema],
+
+  // ✅ visibility add
+  visibility: { type: String, enum: ["all", "friends"], default: "all" },
+
 }, { timestamps: true });
 
 const Post = mongoose.model("Post", postSchema);

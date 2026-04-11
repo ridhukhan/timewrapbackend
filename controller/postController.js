@@ -11,7 +11,7 @@ export const createPost = async (req, res) => {
       secure: true,
     });
 
-    const { caption } = req.body;
+    const { caption, visibility } = req.body; // visibility add
     const author = req.user._id;
 
     let mediaUrl = "";
@@ -42,20 +42,42 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "Post cannot be empty" });
     }
 
-    const post = await Post.create({ author, caption, mediaUrl, mediaType });
-    const populated = await post.populate("author", "name profilePic username");
+    const post = await Post.create({
+      author,
+      caption,
+      mediaUrl,
+      mediaType,
+      visibility: visibility || "all", // visibility add
+    });
 
+    const populated = await post.populate("author", "name profilePic username");
     res.status(201).json(populated);
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 // সব post আনো — latest first
 export const getFeedPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
+    const myId = req.user._id;
+
+    // আমার friends বের করো
+    const me = await User.findById(myId);
+    const friendIds = me.following.filter((id) =>
+      me.followers.map((f) => f.toString()).includes(id.toString())
+    );
+
+    const posts = await Post.find({
+      $or: [
+        { visibility: "all" },
+        {
+          visibility: "friends",
+          author: { $in: [...friendIds, myId] },
+        },
+      ],
+    })
       .populate("author", "name profilePic username")
       .populate("comments.user", "name profilePic username")
       .sort({ createdAt: -1 });
@@ -65,7 +87,6 @@ export const getFeedPosts = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 // Like / Unlike toggle
 export const toggleLike = async (req, res) => {
   try {

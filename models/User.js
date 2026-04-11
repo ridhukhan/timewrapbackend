@@ -9,6 +9,10 @@ const userSchema = new mongoose.Schema({
   bio: { type: String, default: "" },
   username: { type: String, unique: true },
 
+  // Follow system
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
   // Email verification
   isVerified: { type: Boolean, default: false },
   verifyOtp: { type: String, default: "" },

@@ -2,9 +2,7 @@ import nodemailer from "nodemailer";
 
 const getTransporter = () => {
   return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
+    service: "gmail", // সরাসরি সার্ভিস উল্লেখ করা ভালো
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,

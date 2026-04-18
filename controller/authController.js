@@ -61,35 +61,50 @@ const sendResetEmail = async (email, resetUrl) => {
 };
 
 // Register
+// Register
 export const register = async (req, res) => {
   try {
-      console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
-
     const { name, email, password, username } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+    // 1. Check if user already exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // Jodi user thake kintu verified hoye jay, tokhon error dibe
+      if (user.isVerified) {
+        return res.status(400).json({ message: "Email already exists and is verified" });
+      }
+      // Jodi user thake kintu verified NA hoy, tahole amra data update korbo (Niche dekhun)
     }
 
     const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: "Username already taken" });
+    if (existingUsername && (!user || user.username !== username)) {
+       return res.status(400).json({ message: "Username already taken" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      username,
-      verifyOtp: otp,
-      verifyOtpExpiry: otpExpiry,
-    });
+    if (user) {
+      // 2. Existing Unverified User: Just update the details and new OTP
+      user.name = name;
+      user.username = username;
+      user.password = hashedPassword;
+      user.verifyOtp = otp;
+      user.verifyOtpExpiry = otpExpiry;
+      await user.save();
+    } else {
+      // 3. New User: Create fresh entry
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        username,
+        verifyOtp: otp,
+        verifyOtpExpiry: otpExpiry,
+      });
+    }
 
     await sendOtpEmail(email, otp);
 
@@ -102,7 +117,6 @@ export const register = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 // Verify OTP
 export const verifyOtp = async (req, res) => {
   try {

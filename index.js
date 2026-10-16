@@ -44,7 +44,8 @@ io.on("connection", (socket) => {
 
 app.use(cors({ 
   origin: [
-    "https://spaytimes.xyz",      // আপনার মেইন ওয়েবসাইট
+    "https://spaytimes.xyz",
+"https://timewrapbd.netlify.app",      // আপনার মেইন ওয়েবসাইট
     "capacitor://localhost",      // অ্যান্ড্রয়েড অ্যাপের জন্য (খুবই জরুরি)
     "http://localhost"            // লোকাল ডেভেলপমেন্টের জন্য
   ], 
